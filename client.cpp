@@ -41,7 +41,6 @@ int main(void)
 	    		}
 	    		cout<<endl;
 	    	}
-
 		}
 
 	} else 
@@ -92,7 +91,6 @@ int main(void)
 
 			} else 
 				auto err = res.error();
-
 		}
 		else if (choice == 2){
 			string wall_x, wall_y, vertical;
@@ -160,15 +158,28 @@ int main(void)
 			    		}
 			    		cout<<endl;
 			    	}
-
+			    } else 
+					auto err = res.error();
+			}
 		}
-
-		else if (choice == 4){
+		else if (choice == 4){	
+			if (auto res = cli.Get("/stop")) {
+				if (res->status == 200) {
+			    	cout<<"Server has been stoped"<<endl;
+			    }
+			  } else
+			    auto err = res.error();
+		}
+		if (auto res = cli.Get("/win")) {
+			string msg = "";
+			if (res->status == 200) {
+				if(res->body!= "0"){
+					cout<<"Player "+res->body+" has won the game!"<<endl;
+					break;
+				}
+    			
+    		}
+		}
 			
-		}
-	} else 
-		auto err = res.error();
-		}
-		
 	}
 }

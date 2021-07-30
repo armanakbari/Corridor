@@ -10,6 +10,7 @@
 using namespace httplib;
 using namespace std;
 
+int winner_flag = 0;
 
 class Player{
     public:
@@ -122,13 +123,13 @@ string Game::playerMovementHandler(int pn, char move){
         for (int i = 0; i < 11; ++i)
         {   
             for (int j = 0; j < 11; ++j)
-            {
                 msg += to_string(map[i][j]);
-            }
         }
     }
     
-    
+    if(p[pn].p_y == 5 && p[pn].p_x == 5)
+            winner_flag = pn+1;
+
     return msg+"%";
 }
 
@@ -149,9 +150,20 @@ string Game::playerWallPlacementHandler(int x, int y, int v){
     if (v == 1){
         if((x != 0) && (x != 10)){
             if( (map[x][y] == 0) && (map[x-1][y] == 0) && (map[x+1][y] == 0)){
-                map[x][y] = 8;
-                map[x+1][y] = 8;
-                map[x-1][y] = 8;
+                if(y == 5){
+                    if(x != 5 && x != 4 && x != 6){
+                        map[x][y] = 8;
+                        map[x+1][y] = 8;
+                        map[x-1][y] = 8;
+                    }
+                    else{
+                        msg = "can't place a wall there!"; 
+                    }
+                }else{
+                    map[x][y] = 8;
+                    map[x+1][y] = 8;
+                    map[x-1][y] = 8;
+                }
             }else 
                 msg = "can't place a wall there!";
         }else
@@ -160,9 +172,18 @@ string Game::playerWallPlacementHandler(int x, int y, int v){
     }else {
         if((y != 0) && (y != 10)){
             if( (map[x][y] == 0) && (map[x][y-1] == 0) && (map[x][y+1] == 0)){
-                map[x][y] = 8;
-                map[x][y+1] = 8;
-                map[x][y-1] = 8;
+                if(x == 5){
+                    if(y != 5 && y != 4 && y != 6){
+                        map[x][y] = 8;
+                        map[x][y+1] = 8;
+                        map[x][y-1] = 8;
+                    }else
+                        msg = "can't place a wall there!";
+                }else{
+                    map[x][y] = 8;
+                    map[x][y+1] = 8;
+                    map[x][y-1] = 8;
+                }
             }else
                 msg = "can't place a wall there!";
         }else
@@ -194,11 +215,13 @@ int main(void)
     cin>>n;
     n += 1;
     int nn = n;
+    int turn = 1;
+    
     Game Corridor(n);
     string msg = "";
     string masg = "";
-    int turn = 1;
-
+    
+    
     svr.Post("/hi", [&](const Request &req, Response& res) {
         if(n == 0){
             msg = "Sorry "+req.body+". This game is full right now, maybe next game. \n";
@@ -270,28 +293,11 @@ int main(void)
         res.set_content(masg, "text/plain");
     });
 
-
-
-
-
-
-    svr.Get(R"(/numbers/(\d+))", [&](const Request& req, Response& res) {
-    auto numbers = req.matches[1];
-    res.set_content(numbers, "text/plain");
+    svr.Get("/win", [&](const Request& req, Response& res) {
+        res.set_content(to_string(winner_flag), "text/plain");
     });
-
-    svr.Get("/body-header-param", [](const Request& req, Response& res) {
-    if (req.has_header("Content-Length")) {
-      auto val = req.get_header_value("Content-Length");
-    }
-    if (req.has_param("key")) {
-      auto val = req.get_param_value("key");
-    }
-    res.set_content(req.body, "text/plain");
-    });
-
     svr.Get("/stop", [&](const Request& req, Response& res) {
-    svr.stop();
+        svr.stop();
     });
 
     svr.listen("localhost", 8080);
