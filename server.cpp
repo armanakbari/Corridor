@@ -108,6 +108,12 @@ int main(void)
     svr.Get("/win", [&](const Request& req, Response& res) {
         res.set_content(to_string(Corridor.winner_flag), "text/plain");
     });
+    svr.Get("/ready", [&](const Request& req, Response& res) {
+        int ready_flag = 0;
+        if(n == 0)
+            ready_flag = 1;
+        res.set_content(to_string(ready_flag), "text/plain");
+    });
     svr.Get("/stop", [&](const Request& req, Response& res) {
         Corridor.stop_flag = 1;
         res.set_content(to_string(Corridor.stop_flag), "text/plain");
