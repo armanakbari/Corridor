@@ -23,24 +23,22 @@ int main(void)
 		if (res->status == 200) {
 	    	cout << res->body << endl;
 	    	msg = res->body;
-	    	int k = 0;
-	    	for (int i = 0; i < 11; ++i)
-	    	{
-	    		for (int j = 0; j < 11; ++j)
-	    		{
-	    			tmp = msg[k];
-	    			map[i][j] = tmp - 48;
-	    			k++;	
-	    		}
-	    	}
-	    	for (int i = 0; i < 11; ++i)
-	    	{
-	    		for (int j = 0; j < 11; ++j)
-	    		{
-	    			cout<<map[i][j]<<" ";	
-	    		}
-	    		cout<<endl;
-	    	}
+	    	if(msg != "Sorry. This game is full right now, maybe next game."){
+		    	int k = 0;
+		    	for (int i = 0; i < 11; ++i){
+		    		for (int j = 0; j < 11; ++j){
+		    			tmp = msg[k];
+		    			map[i][j] = tmp - 48;
+		    			k++;	
+		    		}
+		    	}
+		    	for (int i = 0; i < 11; ++i){
+		    		for (int j = 0; j < 11; ++j)
+		    			cout<<map[i][j]<<" ";	
+		    		cout<<endl;
+		    	}
+		    }else
+		    	return 0;
 		}
 
 	} else 
@@ -56,6 +54,23 @@ int main(void)
 			<<"4. Exit"  <<endl;
 			
 		cin>>choice;
+		if (auto res = cli.Get("/win")) {
+			string msg = "";
+			if (res->status == 200) {
+				if(res->body!= "0"){
+					cout<<"Player "+res->body+" has won the game!"<<endl;
+					break;
+				}
+    		}
+		}
+		if (auto res = cli.Get("/stop")) {
+			if (res->status == 200) {
+				if(res->body == "1"){
+					cout<<"Game has been stopped!"<<endl;
+					break;
+				}
+    		}
+		}
 		if (choice == 1){
 			cout<<"Enter you move with 'w', 'a', 's', 'd': "<<endl;
 			cin>>move;
@@ -108,7 +123,7 @@ int main(void)
 					cout << res->body << endl;
 			    	msg = res->body;
 	    			int k = 0;
-	    			if(msg != "Invalid move. Try another one.%" && msg != "It's not your turn to move.%"){
+	    			if(msg != "Invalid move. Try another one.%" && msg != "It's not your turn to move.%" && msg != "can't place a wall there!%"){
 	    				for (int i = 0; i < 11; ++i)
 				    	{
 				    		for (int j = 0; j < 11; ++j)
@@ -166,9 +181,10 @@ int main(void)
 			if (auto res = cli.Get("/stop")) {
 				if (res->status == 200) {
 			    	cout<<"Server has been stoped"<<endl;
+			    	return 0;
 			    }
-			  } else
-			    auto err = res.error();
+			}else
+				auto err = res.error();
 		}
 		if (auto res = cli.Get("/win")) {
 			string msg = "";
@@ -180,6 +196,13 @@ int main(void)
     			
     		}
 		}
-			
+		if (auto res = cli.Get("/stop")) {
+			if (res->status == 200) {
+				if(res->body == "1"){
+					cout<<"Game has been stopped!"<<endl;
+					break;
+				}
+    		}
+		}
 	}
 }
